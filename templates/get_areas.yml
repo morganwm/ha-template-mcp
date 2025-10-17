@@ -1,0 +1,20 @@
+description: >-
+  This tool gets a list of all the areas represented in the the system,
+  this is usually a representation of the rooms in the house,
+  or other areas that the user wishes to specify.
+
+  When to use:
+      - when you do not have the exact name of an area
+      - Getting a list of all the areas an entity might be
+      - Collecting more information for use in other tools, such as the specific names of areas that might need to be used for other lookups
+
+  Tips:
+      - use this tool to list areas when not sure about the specific name of an area
+
+template: >-
+  {{
+    states
+    | map(attribute='entity_id')
+    | map('area_id') | unique | reject('none') | list
+    | to_json
+  }}
