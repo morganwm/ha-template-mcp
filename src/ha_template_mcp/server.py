@@ -6,6 +6,10 @@ import yaml
 
 
 def read_yaml_files(template_dir: str) -> dict:
+
+    if template_dir is None or template_dir == "":
+        raise RuntimeError("Template Directory is empty")
+
     """Read all yaml and yml files from the template directory"""
     yaml_data = {}
 
@@ -26,14 +30,17 @@ def read_yaml_files(template_dir: str) -> dict:
 def fill_template_factory(ha_api_url: str, ha_api_key: str):
     template_filling_url = f"{ha_api_url}/template"
 
-    def template_filler(input_template: str) -> str:
-        res = requests.post(
-            url=template_filling_url,
-            json={"template": input_template},
-            headers={"Authorization": f"Bearer {ha_api_key}"},
-        )
-        res.raise_for_status()
-        return res.text
+    def template_filler(input_template: str):
+        def getter_fn():
+            res = requests.post(
+                url=template_filling_url,
+                json={"template": input_template},
+                headers={"Authorization": f"Bearer {ha_api_key}"},
+            )
+            res.raise_for_status()
+            return res.text
+
+        return getter_fn
 
     return template_filler
 
@@ -41,15 +48,16 @@ def fill_template_factory(ha_api_url: str, ha_api_key: str):
 def get_server(template_dir: str, ha_api_url: str, ha_api_key: str) -> FastMCP:
 
     mcp = FastMCP("My MCP Server")
-    t_filler = fill_template_factory(ha_api_key=ha_api_key, ha_api_url=ha_api_url)
+    get_template_filler = fill_template_factory(
+        ha_api_key=ha_api_key, ha_api_url=ha_api_url
+    )
 
     tool_templates = read_yaml_files(template_dir)
     for t_name, t_data in tool_templates.items():
-        print(t_name)
-
-        def template_fn() -> str:
-            return t_filler(t_data.get("template"))
-
-        mcp.tool(template_fn, name=t_name, description=t_data.get("description"))
+        mcp.tool(
+            name_or_fn=get_template_filler(t_data.get("template")),
+            name=t_name,
+            description=t_data.get("description"),
+        )
 
     return mcp

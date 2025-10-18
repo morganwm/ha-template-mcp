@@ -1,3 +1,4 @@
+from typing import Any
 from .server import get_server
 import click
 
@@ -20,15 +21,35 @@ import click
     type=str,
     envvar="HA_API_KEY",
 )
+@click.option(
+    "--transport",
+    help="transport mechanism for the mcp server, default stdio",
+    default="stdio",
+    type=click.Choice(["stdio", "sse", "streamable-http"], case_sensitive=False),
+)
+@click.option(
+    "--transport_arg",
+    help="arguments for the transport settings",
+    type=(str, str),
+    multiple=True,
+    required=False,
+)
 def entry_point(
     template_dir: str,
     ha_api_url: str,
     ha_api_key: str,
+    transport: str,
+    transport_arg: list[tuple[str, Any]] | None = None,
 ):
+    transport_kwargs = {k: v for (k, v) in transport_arg} if transport_arg else {}
+    port_value = transport_kwargs.get("port")
+    if port_value is not None:
+        transport_kwargs["port"] = int(port_value)
+
     server = get_server(
         template_dir=template_dir, ha_api_url=ha_api_url, ha_api_key=ha_api_key
     )
-    server.run(transport="sse", port=8000)
+    server.run(transport=transport, **transport_kwargs)  # type: ignore
 
 
 if __name__ == "__main__":

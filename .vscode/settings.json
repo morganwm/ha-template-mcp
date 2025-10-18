@@ -1,4 +1,7 @@
 {
     "python-envs.pythonProjects": [],
-    "python.terminal.useEnvFile": true
+    "python.terminal.useEnvFile": true,
+    "cSpell.words": [
+        "endfor"
+    ]
 }

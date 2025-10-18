@@ -14,7 +14,9 @@
             "python": "${command:python.interpreterPath}",
             "envFile": "${workspaceFolder}/.env",
             "args": [
-                "--template_dir=/Users/mwmorris/git/ha-template-mcp/templates"
+                "--template_dir=${workspaceFolder}/templates",
+                "--transport=streamable-http",
+                "--transport_arg", "port", "8000",
             ],
         },
 
