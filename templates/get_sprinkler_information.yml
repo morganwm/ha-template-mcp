@@ -1,0 +1,11 @@
+description: |-
+  Gets information about the sprinkler system (which is a rachio brand smart sprinkler)
+
+template: >-
+  {%- set rachio_did = device_id('switch.sidewalk') -%}
+  {% set target_device = rachio_did %}
+  {% set ns = namespace(map={}) %}
+  {% for s in states if device_id(s.entity_id) == target_device %}
+    {% set ns.map = ns.map | combine({ s.entity_id: s.attributes }, recursive=True) %}
+  {% endfor %}
+  {{ ns.map | to_json }}
