@@ -1,5 +1,5 @@
 description: |-
-  Gets information about my Rivian R1S (named fast boi).
+  Gets information about morgan's Rivian R1S (named fast boi).
   For further information about any of these sensors the entities use `fast boi` in their names as that is the alias for the vehicle,
   so using that with the look up tool should help.
   
@@ -34,7 +34,7 @@ template: >-
   - Charging Speed: {{ states('sensor.fast_boi_charging_speed') }} kW
   - Start Time: {{ states('sensor.fast_boi_charging_start_time') }}
   - Elapsed Time: {{ states('sensor.fast_boi_charging_time_elapsed') }} seconds
-  - Estiamted Time Remaining: {{ states('sensor.fast_boi_charging_time_remaining') }} min
+  - Estimated Time Remaining: {{ states('sensor.fast_boi_charging_time_remaining') }} min
   {% endif %}
 
   Climate:

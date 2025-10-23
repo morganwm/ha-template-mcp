@@ -1,0 +1,120 @@
+description: |-
+  Gets information about morgan's Rivian R1S (named fast boi).
+  For further information about any of these sensors the entities use `fast boi` in their names as that is the alias for the vehicle,
+  so using that with the look up tool should help.
+  
+template: >-
+  VEHICLE: Rivian R1S (fast boi)
+  
+  ========================================
+  VEHICLE STATUS
+  ========================================
+  current_state: {{ state_attr('binary_sensor.fast_boi_in_use_state', 'value') }}
+  drive_mode: {{ states('sensor.fast_boi_drive_mode') }}
+  gear_selector: {{ states('sensor.fast_boi_gear_selector') }}
+  speed_mph: {{ states('sensor.fast_boi_speed') }}
+  estimated_range_miles: {{ states('sensor.fast_boi_estimated_vehicle_range') | round() }}
+  odometer_miles: {{ states('sensor.fast_boi_odometer') | round() }}
+  carwash_mode_active: {{ states('binary_sensor.fast_boi_car_wash_mode') == "on" }}
+  pet_mode_active: {{ states('binary_sensor.fast_boi_pet_mode') == "on" }}
+  pet_mode_temperature: {{ states('sensor.fast_boi_pet_mode_temperature_status') }}
+  wiper_fluid_level: {{ state_attr('binary_sensor.fast_boi_wiper_fluid_level', 'value') }}
+  battery_12v_health: {{ states('sensor.fast_boi_12v_battery_health') }}
+  
+  ========================================
+  LOCATION
+  ========================================
+  location_name: {{ states('device_tracker.fast_boi_location') }}
+  latitude: {{ state_attr('device_tracker.fast_boi_location', 'latitude') }}
+  longitude: {{ state_attr('device_tracker.fast_boi_location', 'longitude') }}
+  altitude_feet: {{ states('sensor.fast_boi_altitude') | round() }}
+  bearing_degrees: {{ states('sensor.fast_boi_bearing') | round(2) }}
+  
+  ========================================
+  HIGH VOLTAGE BATTERY & CHARGING
+  ========================================
+  charge_port_door_status: {{ state_attr('binary_sensor.fast_boi_charge_port', 'value') }}
+  connected_to_charger: {{ states('binary_sensor.fast_boi_charger_connection') == "on" }}
+  battery_capacity_kwh: {{ states('sensor.fast_boi_battery_capacity') | round(1) }}
+  state_of_charge_percent: {{ states('sensor.fast_boi_battery_state_of_charge') | round(1) }}
+  charge_limit_percent: {{ states('sensor.fast_boi_battery_state_of_charge_limit') | round(1) }}
+  charging_active: {{ states('binary_sensor.fast_boi_charging_status') == "on" }}
+  {% if states('binary_sensor.fast_boi_charging_status') == "on" %}
+  
+  ACTIVE CHARGING SESSION:
+    charging_speed_kw: {{ states('sensor.fast_boi_charging_speed') }}
+    start_time: {{ states('sensor.fast_boi_charging_start_time') }}
+    elapsed_time_seconds: {{ states('sensor.fast_boi_charging_time_elapsed') }}
+    estimated_time_remaining_min: {{ states('sensor.fast_boi_charging_time_remaining') }}
+  {% endif %}
+  
+  ========================================
+  CLIMATE CONTROL
+  ========================================
+  cabin_temperature: {{ states('sensor.fast_boi_cabin_temperature') }}
+  climate_preconditioning_active: {{ states('binary_sensor.fast_boi_cabin_climate_preconditioning') == "on" }}
+  defrost_defog_active: {{ states('binary_sensor.fast_boi_defrost_defog') == "on" }}
+  heated_steering_wheel_status: {{ states('binary_sensor.fast_boi_heated_steering_wheel') }}
+  driver_set_temperature: {{ states('sensor.fast_boi_driver_temperature') }}
+  
+  ========================================
+  SEAT HEATING & VENTILATION
+  ========================================
+  front_left_seat:
+    heated: {{ states('binary_sensor.fast_boi_heated_seat_front_left') }}
+    ventilated: {{ states('binary_sensor.fast_boi_vented_seat_front_left') }}
+  front_right_seat:
+    heated: {{ states('binary_sensor.fast_boi_heated_seat_front_right') }}
+    ventilated: {{ states('binary_sensor.fast_boi_vented_seat_front_right') }}
+  rear_left_seat:
+    heated: {{ states('binary_sensor.fast_boi_heated_seat_rear_left') }}
+  rear_right_seat:
+    heated: {{ states('binary_sensor.fast_boi_heated_seat_rear_right') }}
+  third_row_left_seat:
+    heated: {{ states('binary_sensor.fast_boi_heated_seat_3rd_row_left') }}
+  third_row_right_seat:
+    heated: {{ states('binary_sensor.fast_boi_heated_seat_3rd_row_right') }}
+  
+  ========================================
+  DOORS & CLOSURES
+  ========================================
+  front_left_door:
+    status: {{ state_attr('binary_sensor.fast_boi_door_front_left', 'value') }}
+    lock: {{ state_attr('binary_sensor.fast_boi_door_front_left_lock', 'value') }}
+  front_right_door:
+    status: {{ state_attr('binary_sensor.fast_boi_door_front_right', 'value') }}
+    lock: {{ state_attr('binary_sensor.fast_boi_door_front_right_lock', 'value') }}
+  rear_left_door:
+    status: {{ state_attr('binary_sensor.fast_boi_door_rear_left', 'value') }}
+    lock: {{ state_attr('binary_sensor.fast_boi_door_rear_left_lock', 'value') }}
+  rear_right_door:
+    status: {{ state_attr('binary_sensor.fast_boi_door_rear_right', 'value') }}
+    lock: {{ state_attr('binary_sensor.fast_boi_door_rear_right_lock', 'value') }}
+  front_trunk:
+    status: {{ state_attr('binary_sensor.fast_boi_front_trunk', 'value') }}
+  lift_gate:
+    status: {{ state_attr('binary_sensor.fast_boi_liftgate', 'value') }}
+  
+  ========================================
+  WINDOWS
+  ========================================
+  front_left_window: {{ state_attr('binary_sensor.fast_boi_window_front_left', 'value') }}
+  front_right_window: {{ state_attr('binary_sensor.fast_boi_window_front_right', 'value') }}
+  rear_left_window: {{ state_attr('binary_sensor.fast_boi_window_rear_left', 'value') }}
+  rear_right_window: {{ state_attr('binary_sensor.fast_boi_window_rear_right', 'value') }}
+  
+  ========================================
+  TIRE PRESSURE
+  ========================================
+  front_left_tire:
+    pressure_psi: {{ states('sensor.fast_boi_tire_pressure_front_left') | round() }}
+    status: {{ states('sensor.fast_boi_tire_pressure_front_left_status') }}
+  front_right_tire:
+    pressure_psi: {{ states('sensor.fast_boi_tire_pressure_front_right') | round() }}
+    status: {{ states('sensor.fast_boi_tire_pressure_front_right_status') }}
+  rear_left_tire:
+    pressure_psi: {{ states('sensor.fast_boi_tire_pressure_rear_left') | round() }}
+    status: {{ states('sensor.fast_boi_tire_pressure_rear_left_status') }}
+  rear_right_tire:
+    pressure_psi: {{ states('sensor.fast_boi_tire_pressure_rear_right') | round() }}
+    status: {{ states('sensor.fast_boi_tire_pressure_rear_right_status') }}

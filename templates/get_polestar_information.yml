@@ -1,0 +1,21 @@
+description: |-
+  Gets information about chad's Polestar 3 Vehicle
+
+template: >-
+  {% if states('binary_sensor.polestar_6959_api_connected') == "on" %}
+
+  Status:
+  - Odometer: {{ states('sensor.polestar_6959_current_odometer') }} miles
+
+  Battery:
+  - Capacity: {{ states('sensor.polestar_6959_battery_capacity') }} kWh
+  - Current State of Charge: {{ states('sensor.polestar_6959_battery_charge_level') }} %
+  - Estimated Current Range: {{ states('sensor.polestar_6959_estimated_range') | round() }} miles
+
+  Charging:
+  - Status: {{ states('sensor.polestar_6959_charging_status') }}
+  - Power: {{ states('sensor.polestar_6959_charging_power') }}
+
+  {% else %}
+  No Data Available
+  {% endif %}
