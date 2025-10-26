@@ -1,3 +1,5 @@
+"""FastMCP server implementation for Home Assistant template execution."""
+
 from fastmcp import FastMCP
 import requests
 
@@ -6,10 +8,21 @@ import yaml
 
 
 def read_yaml_files(template_dir: str) -> dict:
+    """Read all YAML files from the template directory and return as dictionary.
+
+    Args:
+        template_dir: Directory path containing YAML template files.
+
+    Returns:
+        Dictionary mapping filename (without extension) to parsed YAML content.
+
+    Raises:
+        RuntimeError: If template_dir is None or empty string.
+    """
     if template_dir is None or template_dir == "":
         raise RuntimeError("Template Directory is empty")
 
-    """Read all yaml and yml files from the template directory"""
+    # Dictionary to store template name to YAML content mapping
     yaml_data = {}
 
     for root, dirs, files in os.walk(template_dir):
@@ -18,6 +31,7 @@ def read_yaml_files(template_dir: str) -> dict:
                 file_path = os.path.join(root, file)
                 try:
                     with open(file_path, "r") as f:
+                        # Use filename without extension as template identifier
                         file_name_without_ext = os.path.splitext(file)[0]
                         yaml_data[file_name_without_ext] = yaml.safe_load(f)
                 except Exception as e:
@@ -27,10 +41,37 @@ def read_yaml_files(template_dir: str) -> dict:
 
 
 def fill_template_factory(ha_api_url: str, ha_api_key: str):
+    """Create a factory function for filling Home Assistant templates via API.
+
+    Args:
+        ha_api_url: Base URL for Home Assistant API.
+        ha_api_key: Authentication key for Home Assistant API.
+
+    Returns:
+        Function that takes template string and returns function to execute template.
+    """
+    # Construct Home Assistant template API endpoint URL
     template_filling_url = f"{ha_api_url}/template"
 
     def template_filler(input_template: str):
+        """Create template execution function for given template string.
+
+        Args:
+            input_template: Jinja2 template string to be processed.
+
+        Returns:
+            Function that executes the template and returns result text.
+        """
+
         def getter_fn():
+            """Execute template via Home Assistant API.
+
+            Returns:
+                Rendered template as text string.
+
+            Raises:
+                requests.HTTPError: If API request fails.
+            """
             res = requests.post(
                 url=template_filling_url,
                 json={"template": input_template},
@@ -45,11 +86,24 @@ def fill_template_factory(ha_api_url: str, ha_api_key: str):
 
 
 def get_server(template_dir: str, ha_api_url: str, ha_api_key: str) -> FastMCP:
+    """Initialize and configure FastMCP server with Home Assistant template tools.
+
+    Args:
+        template_dir: Directory path containing YAML template files.
+        ha_api_url: Base URL for Home Assistant API.
+        ha_api_key: Authentication key for Home Assistant API.
+
+    Returns:
+        Configured FastMCP server instance with registered template tools.
+    """
+    # Initialize FastMCP server instance
     mcp = FastMCP("My MCP Server")
+    # Create template filler factory with HA credentials
     get_template_filler = fill_template_factory(
         ha_api_key=ha_api_key, ha_api_url=ha_api_url
     )
 
+    # Load all template definitions from YAML files
     tool_templates = read_yaml_files(template_dir)
     for t_name, t_data in tool_templates.items():
         mcp.tool(
