@@ -107,6 +107,11 @@ Creates a mapping between every entity and its assigned area.
 
 **Returns:** JSON object mapping entity IDs to area IDs
 
+---
+
+>Note: There are other examples in the folder that I am leaving as examples, but they are probably not relevant to you unless you have a Rivian R1S, a Polestar 3, and a Rachio sprinkler system and chose to name them exactly as I did.
+
+
 ## Reference
 
 Based on the [MCP server sample using uv project structure](https://github.com/modelcontextprotocol/servers/tree/main/src/time)
