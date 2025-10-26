@@ -6,7 +6,6 @@ import yaml
 
 
 def read_yaml_files(template_dir: str) -> dict:
-
     if template_dir is None or template_dir == "":
         raise RuntimeError("Template Directory is empty")
 
@@ -46,7 +45,6 @@ def fill_template_factory(ha_api_url: str, ha_api_key: str):
 
 
 def get_server(template_dir: str, ha_api_url: str, ha_api_key: str) -> FastMCP:
-
     mcp = FastMCP("My MCP Server")
     get_template_filler = fill_template_factory(
         ha_api_key=ha_api_key, ha_api_url=ha_api_url
