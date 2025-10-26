@@ -48,6 +48,10 @@ uv run ha-template-mcp --template_dir ./templates
 
 > Note: Instructions on getting a HomeAssistant API key can be found [here](https://developers.home-assistant.io/docs/api/rest/) but the gist of it is that they are in your user profile under the `security` tab.
 
+### Debugging in VS Code:
+
+I have left the [`.vscode/launch.json`](/.vscode/launch.json) file out of the `.gitignore` so that the debugging experience is pretty simple. All you will need to do is add a `.env` file at the project root and fill out the `HA_API_URL` and `HA_API_KEY` variables. This will give you a one-click debug config with `streamable-http` transport running on port `8000`. The debug task is set up like this as it makes debugging ~~possible~~ easier since `debugpy` can connect to the python process, and your LLM Backend/Inspector/whatever can hit it and trigger breakpoints without doing a crazy dance to have the MCP arg call debugpy with a wrapper around this code. On a personal note I recommend [this tool for debugging](https://modelcontextprotocol.io/docs/tools/inspector).
+
 ## Command Line Arguments
 
 | Argument | Description | Required | Default | Environment Variable |
