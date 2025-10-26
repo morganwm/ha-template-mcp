@@ -1,5 +1,108 @@
 # ha-template-mcp
 
-this is an MCP server written using FastMCP which will read through a directory supplied as a parameter, the default being `./templates`. every file in the directory is a yaml file which has a few properties including description and template 
+An MCP server for Home Assistant that exposes Jinja2 templates as tools. The server reads YAML template files from a directory and makes them available for querying Home Assistant state information.
 
-[sample mcp server using uv project structure](https://github.com/modelcontextprotocol/servers/tree/main/src/time)
+> Disclosure: a decent chunk of the readme and docs (and the "tests" for the transport arg function) were vibe generated, but I pinky promise I reviewed them.
+
+## Installation
+
+This project uses [`uv`](https://docs.astral.sh/uv/) for dependency management. Install dependencies with:
+
+```bash
+uv sync
+```
+
+## Using the MCP Server
+
+To use this MCP server in something like LM Studio or Claude you can use the following (after `uv tool install .` ing the project):
+
+```json
+"ha-template-local": {
+    "command": "uvx",
+    "args": [
+        "ha-template-mcp",
+        "--template_dir=/your/path/to/the/templates"
+    ],
+    "env": {
+        "HA_API_KEY": "YOUR_API_KEY",
+        "HA_API_URL": "http://homeassistant.local:8123/api"
+    }
+},
+```
+
+## Running the Server
+
+The server can be run directly or installed as a command:
+
+### Direct execution:
+```bash
+uv run ha-template-mcp --template_dir ./templates --ha_api_url http://homeassistant.local:8123/api --ha_api_key YOUR_API_KEY
+```
+
+### Using environment variables:
+```bash
+export HA_API_URL="http://homeassistant.local:8123/api"
+export HA_API_KEY="YOUR_API_KEY"
+uv run ha-template-mcp --template_dir ./templates
+```
+
+> Note: Instructions on getting a HomeAssistant API key can be found [here](https://developers.home-assistant.io/docs/api/rest/) but the gist of it is that they are in your user profile under the `security` tab.
+
+## Command Line Arguments
+
+| Argument | Description | Required | Default | Environment Variable |
+|----------|-------------|----------|---------|---------------------|
+| `--template_dir` | Directory containing YAML template files | Yes | - | - |
+| `--ha_api_url` | Home Assistant API URL (e.g., `http://homeassistant.local:8123/api`) | Yes | - | `HA_API_URL` |
+| `--ha_api_key` | Home Assistant long-lived access token | Yes | - | `HA_API_KEY` |
+| `--transport` | MCP transport mechanism | No | `stdio` | - |
+| `--transport_arg` | Additional transport configuration (can be used multiple times) | No | - | - |
+
+### Transport Options
+
+- **`stdio`** (default): Standard input/output communication
+- **`sse`**: Server-sent events
+- **`streamable-http`**: HTTP streaming
+
+### Transport Arguments Example
+
+For SSE transport with custom port:
+```bash
+uv run ha-template-mcp --template_dir ./templates --transport sse --transport_arg host localhost --transport_arg port 8080
+```
+
+## How It Works
+
+Each template file is a YAML document with two key properties:
+- `description`: Explains what the template does and when to use it
+- `template`: A Jinja2 template that queries Home Assistant state data
+
+The server exposes each template as a callable tool that can be used by LLM assistants to retrieve structured information from Home Assistant.
+
+## Template Examples
+
+### [`get_areas.yml`](templates/get_areas.yml)
+Lists all areas (rooms) defined in the Home Assistant system.
+
+**Use cases:**
+- When you need to find the exact name of an area
+- Getting a list of all areas an entity might be located in
+- Collecting area names for use in other lookups
+
+**Returns:** JSON array of area IDs
+
+---
+
+### [`get_entity_to_area_mapping.yml`](templates/get_entity_to_area_mapping.yml)
+Creates a mapping between every entity and its assigned area.
+
+**Use cases:**
+- Finding which area a specific entity belongs to
+- Understanding the spatial organization of devices
+- Bulk area lookups for multiple entities
+
+**Returns:** JSON object mapping entity IDs to area IDs
+
+## Reference
+
+Based on the [MCP server sample using uv project structure](https://github.com/modelcontextprotocol/servers/tree/main/src/time)
