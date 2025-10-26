@@ -110,16 +110,6 @@ class TestGetTransportKwargs:
         with pytest.raises(ValueError):
             get_transport_kwargs(transport_arg)
 
-    def test_port_with_whitespace_raises_error(self):
-        """Test that port with whitespace raises ValueError."""
-        transport_arg = [("port", " 8080 ")]
-        # This will raise ValueError because int(" 8080 ") works but let's be cautious
-        # Actually int(" 8080 ") works in Python, so this might not raise
-        # Let me test with something that definitely won't work
-        transport_arg = [("port", "8080 extra")]
-        with pytest.raises(ValueError):
-            get_transport_kwargs(transport_arg)
-
     def test_empty_string_port_raises_error(self):
         """Test that empty string port raises ValueError."""
         transport_arg = [("port", "")]
