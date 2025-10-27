@@ -2,6 +2,7 @@
     "python-envs.pythonProjects": [],
     "python.terminal.useEnvFile": true,
     "cSpell.words": [
-        "endfor"
+        "endfor",
+        "selectattr"
     ]
 }
