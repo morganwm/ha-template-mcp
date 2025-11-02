@@ -1,0 +1,5 @@
+description: Test template for demonstrating direct template execution
+template: >-
+  Current time: {{ now() }}
+  Home Assistant version: {{ states('sensor.current_version') }}
+  Number of entities: {{ states | count }}

@@ -83,6 +83,42 @@ Each template file is a YAML document with two key properties:
 
 The server exposes each template as a callable tool that can be used by LLM assistants to retrieve structured information from Home Assistant.
 
+### Additional Tools
+
+Besides the automatically generated tools from YAML templates, the server also provides two flexible tools for executing arbitrary templates:
+
+#### `execute_template_from_file`
+Executes a Home Assistant Jinja2 template from a file path.
+
+**Parameters:**
+- `file_path` (string): Path to a file containing a Jinja2 template (relative or absolute)
+
+**Use cases:**
+- Testing new template files before adding them to the templates directory
+- Running one-off templates stored elsewhere
+- Executing templates with complex formatting that are easier to maintain in separate files
+
+**Example:**
+```python
+result = execute_template_from_file("path/to/custom_template.j2")
+```
+
+#### `execute_template_from_string`
+Executes a Home Assistant Jinja2 template provided directly as a string.
+
+**Parameters:**
+- `template` (string): A Jinja2 template string to be processed by Home Assistant
+
+**Use cases:**
+- Quick ad-hoc queries without creating template files
+- Dynamic template generation based on user input
+- Testing template snippets during development
+
+**Example:**
+```python
+result = execute_template_from_string("{{ states('sensor.temperature') }} °C")
+```
+
 ## Template Examples
 
 ### [`get_areas.yml`](templates/get_areas.yml)
