@@ -4,5 +4,10 @@
     "cSpell.words": [
         "endfor",
         "selectattr"
-    ]
+    ],
+    "python.testing.pytestArgs": [
+        "test"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }
