@@ -1,0 +1,56 @@
+description: >-
+  Get a summary of lights grouped by area with counts of on/off lights per area.
+  This provides a high-level overview of lighting status throughout the house.
+
+  When to use:
+    - Getting a quick overview of which areas have lights on
+    - Understanding overall lighting status across the house
+    - Identifying areas where lights might have been left on
+    - Getting counts of active lights by location
+
+  Tips:
+    - Returns both total light count and on/off counts per area
+    - Also includes a system-wide total
+    - Lights without an assigned area are grouped under "no_area"
+
+template: >-
+  {%- set light_entities = states.light | list -%}
+  {%- set areas_dict = namespace(data={}) -%}
+  {%- set total_on = namespace(data=0) -%}
+  {%- set total_off = namespace(data=0) -%}
+
+  {#- Group lights by area -#}
+  {%- for light in light_entities -%}
+    {%- set area = area_id(light.entity_id) if area_id(light.entity_id) else 'no_area' -%}
+    {%- if area not in areas_dict.data -%}
+      {%- set areas_dict.data = dict(areas_dict.data, **{area: {'on': 0, 'off': 0, 'total': 0}}) -%}
+    {%- endif -%}
+
+    {%- if light.state == 'on' -%}
+      {%- set areas_dict.data = dict(areas_dict.data, **{area: {
+        'on': areas_dict.data[area].on + 1,
+        'off': areas_dict.data[area].off,
+        'total': areas_dict.data[area].total + 1
+      }}) -%}
+      {%- set total_on.data = total_on.data + 1 -%}
+    {%- elif light.state == 'off' -%}
+      {%- set areas_dict.data = dict(areas_dict.data, **{area: {
+        'on': areas_dict.data[area].on,
+        'off': areas_dict.data[area].off + 1,
+        'total': areas_dict.data[area].total + 1
+      }}) -%}
+      {%- set total_off.data = total_off.data + 1 -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {#- Build result -#}
+  {%- set result = {
+    'by_area': areas_dict.data,
+    'totals': {
+      'on': total_on.data,
+      'off': total_off.data,
+      'total': total_on.data + total_off.data
+    }
+  } -%}
+
+  {{- result | to_json -}}

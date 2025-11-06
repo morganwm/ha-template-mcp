@@ -1,0 +1,94 @@
+description: >-
+  Get a comprehensive security overview including locks, covers (garage doors, window shades),
+  cameras, and binary sensors related to security (doors, windows, motion).
+
+  When to use:
+    - Checking if the house is secured (doors locked, garage closed)
+    - Reviewing security sensor status (motion, door/window sensors)
+    - Getting camera availability status
+    - Understanding entry point status before leaving or going to bed
+
+  Tips:
+    - Locks: "locked" is secure, "unlocked" needs attention
+    - Covers: "closed" is secure, "open" might need attention
+    - Binary sensors with device_class door/window/motion are included
+    - Cameras are listed with their current availability
+
+template: >-
+  {%- set ns = namespace(locks=[], covers=[], cameras=[], door_sensors=[], window_sensors=[], motion_sensors=[]) -%}
+
+  {#- Get all locks -#}
+  {%- for lock in states.lock -%}
+    {%- set lock_info = {
+      'entity_id': lock.entity_id,
+      'name': lock.name if lock.name else lock.attributes.friendly_name,
+      'state': lock.state,
+      'area': area_id(lock.entity_id) if area_id(lock.entity_id) else 'unknown',
+      'battery_level': lock.attributes.battery_level if lock.attributes.battery_level is defined else none,
+      'changed_by': lock.attributes.changed_by if lock.attributes.changed_by is defined else none
+    } -%}
+    {%- set ns.locks = ns.locks + [lock_info] -%}
+  {%- endfor -%}
+
+  {#- Get all covers (garage doors, shades, etc.) -#}
+  {%- for cover in states.cover -%}
+    {%- set cover_info = {
+      'entity_id': cover.entity_id,
+      'name': cover.name if cover.name else cover.attributes.friendly_name,
+      'state': cover.state,
+      'area': area_id(cover.entity_id) if area_id(cover.entity_id) else 'unknown',
+      'device_class': cover.attributes.device_class if cover.attributes.device_class is defined else none
+    } -%}
+    {%- set ns.covers = ns.covers + [cover_info] -%}
+  {%- endfor -%}
+
+  {#- Get all cameras -#}
+  {%- for camera in states.camera -%}
+    {%- set camera_info = {
+      'entity_id': camera.entity_id,
+      'name': camera.name if camera.name else camera.attributes.friendly_name,
+      'state': camera.state,
+      'area': area_id(camera.entity_id) if area_id(camera.entity_id) else 'unknown'
+    } -%}
+    {%- set ns.cameras = ns.cameras + [camera_info] -%}
+  {%- endfor -%}
+
+  {#- Get binary sensors for doors, windows, and motion -#}
+  {%- for sensor in states.binary_sensor -%}
+    {%- if sensor.attributes.device_class == 'door' -%}
+      {%- set sensor_info = {
+        'entity_id': sensor.entity_id,
+        'name': sensor.name if sensor.name else sensor.attributes.friendly_name,
+        'state': sensor.state,
+        'area': area_id(sensor.entity_id) if area_id(sensor.entity_id) else 'unknown'
+      } -%}
+      {%- set ns.door_sensors = ns.door_sensors + [sensor_info] -%}
+    {%- elif sensor.attributes.device_class == 'window' -%}
+      {%- set sensor_info = {
+        'entity_id': sensor.entity_id,
+        'name': sensor.name if sensor.name else sensor.attributes.friendly_name,
+        'state': sensor.state,
+        'area': area_id(sensor.entity_id) if area_id(sensor.entity_id) else 'unknown'
+      } -%}
+      {%- set ns.window_sensors = ns.window_sensors + [sensor_info] -%}
+    {%- elif sensor.attributes.device_class == 'motion' -%}
+      {%- set sensor_info = {
+        'entity_id': sensor.entity_id,
+        'name': sensor.name if sensor.name else sensor.attributes.friendly_name,
+        'state': sensor.state,
+        'area': area_id(sensor.entity_id) if area_id(sensor.entity_id) else 'unknown'
+      } -%}
+      {%- set ns.motion_sensors = ns.motion_sensors + [sensor_info] -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- set result = {
+    'locks': ns.locks,
+    'covers': ns.covers,
+    'cameras': ns.cameras,
+    'door_sensors': ns.door_sensors,
+    'window_sensors': ns.window_sensors,
+    'motion_sensors': ns.motion_sensors
+  } -%}
+
+  {{- result | to_json -}}

@@ -1,0 +1,58 @@
+description: >-
+  Get the status of all media players in the system, including what's currently playing
+  and the state of each device.
+
+  When to use:
+    - Checking what media is currently playing in the house
+    - Finding active media players
+    - Getting information about media playback (song, artist, volume, etc.)
+    - Understanding which media devices are on or idle
+
+  Tips:
+    - "playing" state means media is actively playing
+    - "paused" state means media is paused
+    - "idle" or "off" means no media is playing
+    - Includes information about current media title, artist, album, and volume
+
+template: >-
+  {%- set media_players = states.media_player | list -%}
+  
+  {#- Initialize dictionary to store arrays for each state -#}
+  {%- set states_dict = namespace(data={}) -%}
+
+  {%- for player in media_players -%}
+    {%- set player_info = {
+      'entity_id': player.entity_id,
+      'name': player.name if player.name else player.attributes.friendly_name,
+      'state': player.state,
+      'area': area_id(player.entity_id) if area_id(player.entity_id) else 'unknown',
+      'volume_level': player.attributes.volume_level if player.attributes.volume_level is defined else none,
+      'media_title': player.attributes.media_title if player.attributes.media_title is defined else none,
+      'media_artist': player.attributes.media_artist if player.attributes.media_artist is defined else none,
+      'media_album_name': player.attributes.media_album_name if player.attributes.media_album_name is defined else none,
+      'app_name': player.attributes.app_name if player.attributes.app_name is defined else none
+    } -%}
+    
+    {#- Use the player's actual state as the key -#}
+    {%- set state_key = player.state -%}
+    
+    {#- If this state doesn't exist in the dictionary yet, create it with an empty array -#}
+    {%- if state_key not in states_dict.data -%}
+      {%- set states_dict.data = dict(states_dict.data, **{state_key: []}) -%}
+    {%- endif -%}
+    
+    {#- Add player to corresponding state array in dictionary using concatenation -#}
+    {%- set current_list = states_dict.data[state_key] -%}
+    {%- set states_dict.data = dict(states_dict.data, **{state_key: current_list + [player_info]}) -%}
+  {%- endfor -%}
+  
+  {#- Build summary dynamically from dictionary -#}
+  {%- set summary = namespace(data={'total': media_players | length}) -%}
+  {%- for state_name, players_list in states_dict.data.items() -%}
+    {%- set summary.data = dict(summary.data, **{state_name: players_list | length}) -%}
+  {%- endfor -%}
+
+  {#- Build result object from dictionary -#}
+  {%- set result = dict({'summary': summary.data}, **states_dict.data) -%}
+
+  {{- result | to_json -}}

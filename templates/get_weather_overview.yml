@@ -1,0 +1,36 @@
+description: >-
+  Get current weather conditions and forecast information from all weather entities.
+
+  When to use:
+    - Checking current weather conditions
+    - Getting temperature and humidity information
+    - Understanding outdoor conditions for planning activities
+    - Checking weather forecast data
+
+  Tips:
+    - Includes temperature, humidity, wind, and condition information
+    - May include forecast data if available from the weather entity
+    - Some weather entities provide more detailed information than others
+
+template: >-
+  {%- set weather_entities = states.weather | list -%}
+  {%- set result = namespace(data=[]) -%}
+
+  {%- for weather in weather_entities -%}
+    {%- set weather_info = {
+      'entity_id': weather.entity_id,
+      'name': weather.name if weather.name else weather.attributes.friendly_name,
+      'state': weather.state,
+      'temperature': weather.attributes.temperature if weather.attributes.temperature is defined else none,
+      'temperature_unit': weather.attributes.temperature_unit if weather.attributes.temperature_unit is defined else none,
+      'humidity': weather.attributes.humidity if weather.attributes.humidity is defined else none,
+      'wind_speed': weather.attributes.wind_speed if weather.attributes.wind_speed is defined else none,
+      'wind_bearing': weather.attributes.wind_bearing if weather.attributes.wind_bearing is defined else none,
+      'pressure': weather.attributes.pressure if weather.attributes.pressure is defined else none,
+      'visibility': weather.attributes.visibility if weather.attributes.visibility is defined else none,
+      'forecast': weather.attributes.forecast if weather.attributes.forecast is defined else none
+    } -%}
+    {%- set result.data = result.data + [weather_info] -%}
+  {%- endfor -%}
+
+  {{- result.data | to_json -}}

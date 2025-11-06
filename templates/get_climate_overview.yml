@@ -1,0 +1,36 @@
+description: >-
+  Get an overview of all climate entities (thermostats, temperature controls) in the system.
+  This provides current temperature, target temperature, HVAC mode, and action for each climate entity.
+
+  When to use:
+    - Getting temperature status throughout the house
+    - Understanding current heating/cooling states
+    - Checking if HVAC systems are active or idle
+    - Understanding comfort settings across different zones
+
+  Tips:
+    - This returns all climate entities including smart bed temperature controls and thermostats
+    - The "hvac_action" field shows what the device is currently doing (heating, cooling, idle, etc.)
+    - The "state" field shows the mode the device is set to (heat, cool, heat_cool, off, etc.)
+
+template: >-
+  {%- set climate_entities = states.climate | list -%}
+  {%- set result = namespace(data=[]) -%}
+
+  {%- for entity in climate_entities -%}
+    {%- set item = {
+      'entity_id': entity.entity_id,
+      'name': entity.name if entity.name else entity.attributes.friendly_name,
+      'state': entity.state,
+      'current_temperature': entity.attributes.current_temperature if entity.attributes.current_temperature is defined else none,
+      'target_temperature': entity.attributes.temperature if entity.attributes.temperature is defined else none,
+      'target_temp_high': entity.attributes.target_temp_high if entity.attributes.target_temp_high is defined else none,
+      'target_temp_low': entity.attributes.target_temp_low if entity.attributes.target_temp_low is defined else none,
+      'hvac_action': entity.attributes.hvac_action if entity.attributes.hvac_action is defined else none,
+      'current_humidity': entity.attributes.current_humidity if entity.attributes.current_humidity is defined else none,
+      'fan_mode': entity.attributes.fan_mode if entity.attributes.fan_mode is defined else none
+    } -%}
+    {%- set result.data = result.data + [item] -%}
+  {%- endfor -%}
+
+  {{- result.data | to_json -}}

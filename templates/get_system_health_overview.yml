@@ -1,0 +1,92 @@
+description: >-
+  Get a high-level overview of the entire Home Assistant system health.
+  This provides summary statistics across all entity types and identifies potential issues.
+
+  When to use:
+    - Getting a quick health check of the entire system
+    - Identifying areas that need attention
+    - Understanding the overall state of the home
+    - Providing a system status summary
+
+  Tips:
+    - Provides counts by domain (lights, switches, sensors, etc.)
+    - Identifies unavailable entities
+    - Shows active devices (lights on, media playing, etc.)
+    - Useful for a quick system-wide status check
+
+template: >-
+  {%- set counts = namespace(
+    unavailable=0,
+    unknown=0,
+    active_lights=0,
+    active_switches=0,
+    playing_media=0,
+    unlocked_locks=0,
+    open_covers=0,
+    disabled_automations=0
+  ) -%}
+  {%- set by_domain = namespace(data={}) -%}
+
+  {#- Count entities by domain and check states -#}
+  {%- for entity in states -%}
+    {#- Count by domain -#}
+    {%- set domain = entity.domain -%}
+    {%- if domain not in by_domain.data -%}
+      {%- set by_domain.data = dict(by_domain.data, **{domain: 0}) -%}
+    {%- endif -%}
+    {%- set by_domain.data = dict(by_domain.data, **{domain: by_domain.data[domain] + 1}) -%}
+
+    {#- Check for unavailable/unknown -#}
+    {%- if entity.state == 'unavailable' -%}
+      {%- set counts.unavailable = counts.unavailable + 1 -%}
+    {%- elif entity.state == 'unknown' -%}
+      {%- set counts.unknown = counts.unknown + 1 -%}
+    {%- endif -%}
+
+    {#- Count active lights -#}
+    {%- if entity.domain == 'light' and entity.state == 'on' -%}
+      {%- set counts.active_lights = counts.active_lights + 1 -%}
+    {%- endif -%}
+
+    {#- Count active switches -#}
+    {%- if entity.domain == 'switch' and entity.state == 'on' -%}
+      {%- set counts.active_switches = counts.active_switches + 1 -%}
+    {%- endif -%}
+
+    {#- Count playing media -#}
+    {%- if entity.domain == 'media_player' and entity.state == 'playing' -%}
+      {%- set counts.playing_media = counts.playing_media + 1 -%}
+    {%- endif -%}
+
+    {#- Count unlocked locks -#}
+    {%- if entity.domain == 'lock' and entity.state == 'unlocked' -%}
+      {%- set counts.unlocked_locks = counts.unlocked_locks + 1 -%}
+    {%- endif -%}
+
+    {#- Count open covers -#}
+    {%- if entity.domain == 'cover' and entity.state == 'open' -%}
+      {%- set counts.open_covers = counts.open_covers + 1 -%}
+    {%- endif -%}
+
+    {#- Count disabled automations -#}
+    {%- if entity.domain == 'automation' and entity.state == 'off' -%}
+      {%- set counts.disabled_automations = counts.disabled_automations + 1 -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {#- Build final result -#}
+  {%- set result = {
+    'timestamp': now().isoformat(),
+    'total_entities': states | count,
+    'by_domain': by_domain.data,
+    'unavailable_count': counts.unavailable,
+    'unknown_count': counts.unknown,
+    'active_lights': counts.active_lights,
+    'active_switches': counts.active_switches,
+    'playing_media': counts.playing_media,
+    'unlocked_locks': counts.unlocked_locks,
+    'open_covers': counts.open_covers,
+    'disabled_automations': counts.disabled_automations
+  } -%}
+
+  {{- result | to_json -}}

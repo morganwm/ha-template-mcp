@@ -1,0 +1,53 @@
+description: >-
+  Get a summary of all switches grouped by area with their current states.
+  This includes smart plugs, switches, and other switchable devices.
+
+  When to use:
+    - Checking which switches are currently on or off
+    - Getting an overview of power consumption devices
+    - Identifying switches left on by area
+    - Managing smart plugs and outlets throughout the house
+
+  Tips:
+    - Includes all switch entities (smart plugs, relays, etc.)
+    - Grouped by area for easy location-based overview
+    - Switches without an area are grouped under "no_area"
+
+template: >-
+  {%- set switches = states.switch | list -%}
+  {%- set by_area = namespace(data={}) -%}
+  {%- set total_on = namespace(count=0) -%}
+  {%- set total_off = namespace(count=0) -%}
+
+  {%- for switch in switches -%}
+    {%- set area = area_id(switch.entity_id) if area_id(switch.entity_id) else 'no_area' -%}
+
+    {%- if area not in by_area.data -%}
+      {%- set by_area.data = dict(by_area.data, **{area: []}) -%}
+    {%- endif -%}
+
+    {%- set switch_info = {
+      'entity_id': switch.entity_id,
+      'name': switch.name if switch.name else switch.attributes.friendly_name,
+      'state': switch.state
+    } -%}
+
+    {%- set by_area.data = dict(by_area.data, **{area: by_area.data[area] + [switch_info]}) -%}
+
+    {%- if switch.state == 'on' -%}
+      {%- set total_on.count = total_on.count + 1 -%}
+    {%- elif switch.state == 'off' -%}
+      {%- set total_off.count = total_off.count + 1 -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- set result = {
+    'summary': {
+      'total': switches | length,
+      'on': total_on.count,
+      'off': total_off.count
+    },
+    'by_area': by_area.data
+  } -%}
+
+  {{- result | to_json -}}

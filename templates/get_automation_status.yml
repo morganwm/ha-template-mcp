@@ -1,0 +1,48 @@
+description: >-
+  Get the status of all automations in the system, including whether they are enabled or disabled,
+  and when they were last triggered.
+
+  When to use:
+    - Checking which automations are currently active
+    - Identifying disabled automations that might need to be re-enabled
+    - Troubleshooting why certain automations aren't running
+    - Getting an overview of automation activity
+
+  Tips:
+    - "on" state means the automation is enabled and will trigger
+    - "off" state means the automation is disabled and won't trigger
+    - last_triggered shows when the automation last ran (if ever)
+    - A null last_triggered means the automation has never been triggered
+
+template: >-
+  {%- set automations = states.automation | list -%}
+  {%- set enabled = namespace(data=[]) -%}
+  {%- set disabled = namespace(data=[]) -%}
+
+  {%- for auto in automations -%}
+    {%- set auto_info = {
+      'entity_id': auto.entity_id,
+      'name': auto.name if auto.name else auto.attributes.friendly_name,
+      'state': auto.state,
+      'last_triggered': auto.attributes.last_triggered.isoformat() if auto.attributes.last_triggered is defined and auto.attributes.last_triggered is not none else none,
+      'mode': auto.attributes.mode if auto.attributes.mode is defined else none
+    } -%}
+
+    {%- if auto.state == 'on' -%}
+      {%- set enabled.data = enabled.data + [auto_info] -%}
+    {%- else -%}
+      {%- set disabled.data = disabled.data + [auto_info] -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- set result = {
+    'summary': {
+      'total': automations | length,
+      'enabled': enabled.data | length,
+      'disabled': disabled.data | length
+    },
+    'enabled': enabled.data,
+    'disabled': disabled.data
+  } -%}
+
+  {{- result | to_json -}}

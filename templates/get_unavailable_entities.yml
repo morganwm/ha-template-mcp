@@ -1,0 +1,53 @@
+description: >-
+  Get a list of all entities that are currently unavailable or in an unknown state.
+  This is useful for identifying connectivity issues, dead batteries, or offline devices.
+
+  When to use:
+    - Troubleshooting device connectivity issues
+    - Identifying devices that may need battery replacement or attention
+    - Checking system health
+    - Finding entities that have lost connection
+
+  Tips:
+    - Entities in "unavailable" state typically have connectivity issues
+    - Entities in "unknown" state may have just started or have configuration issues
+    - The last_updated timestamp helps identify how long an entity has been unavailable
+    - Check battery-powered devices first when troubleshooting
+
+template: >-
+  {%- set unavailable = namespace(entities=[]) -%}
+  {%- set unknown = namespace(entities=[]) -%}
+
+  {#- Find all entities that are unavailable or unknown -#}
+  {%- for entity in states -%}
+    {%- if entity.state == 'unavailable' -%}
+      {%- set info = {
+        'entity_id': entity.entity_id,
+        'name': entity.name if entity.name else entity.attributes.friendly_name,
+        'domain': entity.domain,
+        'area': area_id(entity.entity_id) if area_id(entity.entity_id) else 'unknown',
+        'last_updated': entity.last_updated.isoformat() if entity.last_updated is defined else none,
+        'device_class': entity.attributes.device_class if entity.attributes.device_class is defined else none
+      } -%}
+      {%- set unavailable.entities = unavailable.entities + [info] -%}
+    {%- elif entity.state == 'unknown' -%}
+      {%- set info = {
+        'entity_id': entity.entity_id,
+        'name': entity.name if entity.name else entity.attributes.friendly_name,
+        'domain': entity.domain,
+        'area': area_id(entity.entity_id) if area_id(entity.entity_id) else 'unknown',
+        'last_updated': entity.last_updated.isoformat() if entity.last_updated is defined else none,
+        'device_class': entity.attributes.device_class if entity.attributes.device_class is defined else none
+      } -%}
+      {%- set unknown.entities = unknown.entities + [info] -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- set result = {
+    'unavailable_count': unavailable.entities | length,
+    'unknown_count': unknown.entities | length,
+    'unavailable': unavailable.entities,
+    'unknown': unknown.entities
+  } -%}
+
+  {{- result | to_json -}}
