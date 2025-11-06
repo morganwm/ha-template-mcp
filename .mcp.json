@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "ha-template-local": {
+      "command": "uvx",
+      "args": [
+        "--from", "${HOME}/git/ha-template-mcp",
+        "ha-template-mcp",
+        "--template_dir=${HOME}/git/ha-template-mcp/templates"
+      ],
+      "env": {
+        "HA_API_KEY": "${HA_API_KEY}",
+        "HA_API_URL": "${HA_API_URL}"
+      }
+    },
+    "custom-ha-local": {
+      "command": "${HOME}/git/ha-client-rs/target/release/ha-client-mcp",
+      "env": {
+        "HA_API_KEY": "${HA_API_KEY}",
+        "HA_API_URL": "${HA_API_URL}"
+      }
+    }
+  }
+}
