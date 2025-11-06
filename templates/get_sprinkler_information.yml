@@ -3,14 +3,14 @@ description: |-
 
 template: >-
   {%- set rachio_did = device_id('switch.sidewalk') -%}
-  {% set target_device = rachio_did %}
-  {% set ns = namespace(map={}) %}
-  {% for s in states if device_id(s.entity_id) == target_device %}
-    {% set ns.map = ns.map | combine({
+  {%- set target_device = rachio_did -%}
+  {%- set ns = namespace(map={}) -%}
+  {%- for s in states if device_id(s.entity_id) == target_device -%}
+    {%- set ns.map = ns.map | combine({
       s.entity_id: {
         "state": s.state,
         "attributes": s.attributes
       }
-    }, recursive=True) %}
-  {% endfor %}
-  {{ ns.map | to_json }}
+    }, recursive=True) -%}
+  {%- endfor -%}
+  {{- ns.map | to_json -}}

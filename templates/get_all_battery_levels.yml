@@ -2,51 +2,46 @@ description: |-
   Get all of the entities that have batteries and the current battery level
 
 template: >-
-  {% set by_device_class = states.sensor
+  {%- set by_device_class = states.sensor
     | selectattr('attributes.device_class', '==', 'battery')
-    | list %}
-
-  {% set by_attr_level = states
+    | list -%}
+  {%- set by_attr_level = states
     | selectattr('attributes.battery_level', 'defined')
-    | list %}
-
-  {% set by_attr_battery = states
+    | list -%}
+  {%- set by_attr_battery = states
     | selectattr('attributes.battery', 'defined')
-    | list %}
-
-  {# Combine and de-duplicate by entity_id #}
-  {% set seen = namespace(ids=[]) %}
-  {% set candidates = namespace(entities=[]) %}
-  {% for e in by_device_class + by_attr_level + by_attr_battery %}
-    {% if e.entity_id not in seen.ids %}
-      {% set seen.ids = seen.ids + [e.entity_id] %}
-      {% set candidates.entities = candidates.entities + [e] %}
-    {% endif %}
-  {% endfor %}
-
-  {# Build normalized rows with best-effort numeric level #}
-  {% set rows = namespace(e=[]) %}
-  {% for e in candidates.entities %}
-    {% set raw =
+    | list -%}
+  {#- Combine and de-duplicate by entity_id -#}
+  {%- set seen = namespace(ids=[]) -%}
+  {%- set candidates = namespace(entities=[]) -%}
+  {%- for e in by_device_class + by_attr_level + by_attr_battery -%}
+    {%- if e.entity_id not in seen.ids -%}
+      {%- set seen.ids = seen.ids + [e.entity_id] -%}
+      {%- set candidates.entities = candidates.entities + [e] -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {#- Build normalized rows with best-effort numeric level -#}
+  {%- set rows = namespace(e=[]) -%}
+  {%- for e in candidates.entities -%}
+    {%- set raw =
         e.state if e.attributes.device_class == 'battery'
         else (e.attributes.battery_level
               if e.attributes.battery_level is defined
-              else e.attributes.battery) %}
-    {# Try to coerce to a number; fall back to None for unknown/unavailable #}
-    {% set lvl = (raw | float( default=none )) %}
-    {% set unit = e.attributes.unit_of_measurement
+              else e.attributes.battery) -%}
+    {#- Try to coerce to a number; fall back to None for unknown/unavailable -#}
+    {%- set lvl = (raw | float( default=none )) -%}
+    {%- set unit = e.attributes.unit_of_measurement
                   if e.attributes.unit_of_measurement is defined
-                  else '%' %}
-    {% if lvl is not none and lvl == lvl %} {# exclude NaN #}
-      {% set row = {
+                  else '%' -%}
+    {%- if lvl is not none and lvl == lvl -%} {#- exclude NaN -#}
+      {%- set row = {
         'entity_id': e.entity_id,
         'name': e.name if e.name is defined else e.attributes.friendly_name,
         'level': lvl,
         'unit': unit
-      } %}
-      {% set rows.e = rows.e + [row] %}
-    {% endif %}
-  {% endfor %}
-
-  {# Sort low → high and emit JSON #}
-  {{ rows.e | sort(attribute='level') | to_json }}
+      } -%}
+      {%- set rows.e = rows.e + [row] -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {#- Sort low → high and emit JSON -#}
+  {{- rows.e | sort(attribute='level') | to_json -}}

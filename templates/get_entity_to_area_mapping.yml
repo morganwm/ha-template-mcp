@@ -2,11 +2,11 @@ description: |-
   Gets a mapping between every area and the entities in that area
 
 template: >-
-  {% set ns = namespace(result={}) %}
-  {% for s in states %}
-      {% set area = area_id(s.entity_id) %}
-      {% if area %}
-          {% set ns.result = ns.result | combine({ s.entity_id: area }) %}
-      {% endif %}
-  {% endfor %}
-  {{ ns.result | to_json }}
+  {%- set ns = namespace(result={}) -%}
+  {%- for s in states -%}
+      {%- set area = area_id(s.entity_id) -%}
+      {%- if area -%}
+          {%- set ns.result = ns.result | combine({ s.entity_id: area }) -%}
+      {%- endif -%}
+  {%- endfor -%}
+  {{- ns.result | to_json -}}
