@@ -4,6 +4,10 @@ An MCP server for Home Assistant that exposes Jinja2 templates as tools. The ser
 
 > Disclosure: a decent chunk of the readme and docs (and the "tests" for the transport arg function) were vibe generated, but I pinky promise I reviewed them.
 
+## "Just give me the templates!"
+
+[Sure thing!](/templates/)
+
 ## Installation
 
 This project uses [`uv`](https://docs.astral.sh/uv/) for dependency management. Install dependencies with:
