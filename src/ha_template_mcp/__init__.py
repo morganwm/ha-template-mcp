@@ -54,12 +54,19 @@ def get_transport_kwargs(transport_arg: list[tuple[str, Any]] | None = None):
     multiple=True,
     required=False,
 )
+@click.option(
+    "--template_file_path_rewrite",
+    help="rewrite path prefix for template files",
+    type=(str, str),
+    required=False,
+)
 def entry_point(
     template_dir: str,
     ha_api_url: str,
     ha_api_key: str,
     transport: str,
     transport_arg: list[tuple[str, Any]] | None = None,
+    template_file_path_rewrite: tuple[str, str] | None = None,
 ):
     """CLI entry point for the Home Assistant MCP server.
 
@@ -75,7 +82,10 @@ def entry_point(
 
     # Initialize MCP server with Home Assistant configuration
     server = get_server(
-        template_dir=template_dir, ha_api_url=ha_api_url, ha_api_key=ha_api_key
+        template_dir=template_dir,
+        ha_api_url=ha_api_url,
+        ha_api_key=ha_api_key,
+        template_file_path_rewrite=template_file_path_rewrite,
     )
     server.run(transport=transport, **transport_kwargs)  # type: ignore
 

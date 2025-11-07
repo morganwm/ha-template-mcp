@@ -85,7 +85,12 @@ def fill_template_factory(ha_api_url: str, ha_api_key: str):
     return template_filler
 
 
-def get_server(template_dir: str, ha_api_url: str, ha_api_key: str) -> FastMCP:
+def get_server(
+    template_dir: str,
+    ha_api_url: str,
+    ha_api_key: str,
+    template_file_path_rewrite: tuple[str, str] | None = None,
+) -> FastMCP:
     """Initialize and configure FastMCP server with Home Assistant template tools.
 
     Args:
@@ -131,6 +136,11 @@ def get_server(template_dir: str, ha_api_url: str, ha_api_key: str) -> FastMCP:
             RuntimeError: If there's an error reading the file or executing the template.
         """
         try:
+            if template_file_path_rewrite:
+                (rewrite_src, rewrite_dst) = template_file_path_rewrite
+                new_file_path = file_path.replace(rewrite_src, rewrite_dst)
+                file_path = new_file_path
+
             # Check if file_path is relative, make it relative to template_dir if needed
             if not os.path.isabs(file_path):
                 # First try relative to current working directory

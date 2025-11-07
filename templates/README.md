@@ -80,6 +80,40 @@ Retrieves current weather conditions and forecast data from weather entities.
 
 ---
 
+#### `get_temperature_humidity_sensors.yml`
+Provides all temperature and humidity sensor readings organized by area.
+
+**Use cases:**
+- Monitoring indoor climate conditions across different rooms
+- Identifying rooms that are too hot, cold, humid, or dry
+- Comparing temperature/humidity levels between areas
+- Understanding environmental comfort throughout the home
+
+**Returns:**
+- Temperature sensors grouped by area
+- Humidity sensors grouped by area
+- Current values with units (°F or °C, %)
+- Sensors without an assigned area grouped under "no_area"
+
+---
+
+#### `get_energy_power_sensors.yml`
+Provides all energy and power consumption sensors organized by area.
+
+**Use cases:**
+- Monitoring real-time power consumption
+- Tracking energy usage across different devices
+- Identifying high-power consuming devices
+- Understanding energy patterns throughout the home
+
+**Returns:**
+- Power sensors (instantaneous usage in W or kW) grouped by area
+- Energy sensors (cumulative usage in kWh) grouped by area
+- Current values with units
+- Sensors without an assigned area grouped under "no_area"
+
+---
+
 ### Lighting Templates
 
 #### `get_lights_summary_by_area.yml`
@@ -273,10 +307,42 @@ When helping users understand their home automation system:
 
 ## Contributing New Templates
 
-When creating new templates:
+### Quick Start with Slash Commands
+
+The easiest way to create a new template is using the custom slash commands:
+
+1. **Run `/template-dev`** - Launches a specialized agent that:
+   - Researches entities using the correct tools
+   - Creates the template with proper structure
+   - Tests using `execute_template_from_file` (live refresh)
+   - Updates this README automatically
+   - Follows quality checklist
+
+2. **Run `/test-template`** - Quick test and feedback for existing templates:
+   - Tests template with live refresh
+   - Analyzes output quality
+   - Suggests improvements
+
+### Manual Template Development
+
+When creating templates manually:
 1. Include comprehensive `description` with "When to use" and "Tips" sections
 2. Use consistent JSON output format
 3. Include area information when relevant (via `area_id(entity_id)`)
 4. Handle missing attributes gracefully with `is defined` checks
 5. Provide friendly names alongside entity IDs
 6. Sort or group data logically for LLM consumption
+7. **Always test with** `mcp__ha-template-local__execute_template_from_file`
+   - **DO NOT** use pre-registered template tools (they're cached!)
+
+### Template Quality Checklist
+
+Before submitting a new template:
+- ✅ Template executes without errors
+- ✅ Output format is consistent (preferably JSON)
+- ✅ Missing attributes handled gracefully
+- ✅ Area information included where relevant
+- ✅ Friendly names provided
+- ✅ Description includes "When to use" and "Tips"
+- ✅ Output is concise but complete
+- ✅ This README updated with new template documentation

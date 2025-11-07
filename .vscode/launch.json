@@ -19,6 +19,22 @@
                 "--transport_arg", "port", "8000",
             ],
         },
+        {
+            "name": "Run - For Playground",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/ha_template_mcp",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "python": "${command:python.interpreterPath}",
+            "envFile": "${workspaceFolder}/.env",
+            "args": [
+                "--template_dir=${workspaceFolder}/templates",
+                "--transport=streamable-http",
+                "--transport_arg", "port", "8000",
+                "--template_file_path_rewrite", "/workspace", "~/misc/ha-template-playground/src"
+            ],
+        },
 
     ]
 }

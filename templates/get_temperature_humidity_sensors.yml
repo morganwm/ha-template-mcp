@@ -1,0 +1,53 @@
+description: >-
+  Get all temperature and humidity sensor readings throughout the system.
+  This provides current temperature and humidity values organized by area.
+
+  When to use:
+    - Monitoring indoor climate conditions across different rooms
+    - Identifying rooms that are too hot, cold, humid, or dry
+    - Comparing temperature/humidity levels between areas
+    - Understanding environmental comfort throughout the home
+
+  Tips:
+    - Sensors are grouped by area for easy location-based comparison
+    - Both temperature and humidity sensors are included if available
+    - Sensors without an assigned area are grouped under "no_area"
+    - Temperature units are preserved from the sensor (°F or °C)
+
+template: >-
+  {%- set temp_sensors = states.sensor
+    | selectattr('attributes.device_class', '==', 'temperature')
+    | list -%}
+  {%- set humidity_sensors = states.sensor
+    | selectattr('attributes.device_class', '==', 'humidity')
+    | list -%}
+
+  {#- Build a mapping of area -> sensors -#}
+  {%- set by_area = namespace(data={}) -%}
+
+  {%- for sensor in temp_sensors + humidity_sensors -%}
+    {%- set area_name = area_name(sensor.entity_id) if area_id(sensor.entity_id) else 'no_area' -%}
+    {%- set sensor_type = sensor.attributes.device_class -%}
+
+    {#- Initialize area if not exists -#}
+    {%- if area_name not in by_area.data -%}
+      {%- set by_area.data = dict(by_area.data, **{area_name: {'temperature': [], 'humidity': []}}) -%}
+    {%- endif -%}
+
+    {%- set sensor_info = {
+      'entity_id': sensor.entity_id,
+      'name': sensor.name if sensor.name else sensor.attributes.friendly_name,
+      'value': sensor.state if sensor.state not in ['unavailable', 'unknown'] else none,
+      'unit': sensor.attributes.unit_of_measurement if sensor.attributes.unit_of_measurement is defined else none
+    } -%}
+
+    {%- if sensor_type == 'temperature' -%}
+      {%- set current = by_area.data[area_name]['temperature'] -%}
+      {%- set by_area.data = dict(by_area.data, **{area_name: dict(by_area.data[area_name], temperature=current + [sensor_info])}) -%}
+    {%- elif sensor_type == 'humidity' -%}
+      {%- set current = by_area.data[area_name]['humidity'] -%}
+      {%- set by_area.data = dict(by_area.data, **{area_name: dict(by_area.data[area_name], humidity=current + [sensor_info])}) -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {{- by_area.data | to_json -}}

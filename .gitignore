@@ -12,3 +12,5 @@ wheels/
 .env
 .roo
 .claude
+
+.DS_Store
