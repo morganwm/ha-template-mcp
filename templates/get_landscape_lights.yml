@@ -1,0 +1,8 @@
+description: |-
+  Gets the status of the different landscape lights 
+
+template: >-
+  Front Yard Landscape Lights (entity: switch.front_yard_landscape_lights): {{ states.switch.front_yard_landscape_lights.state }}
+  Backyard Pathway Landscape Lights (entity: switch.backyard_pathway_landscape_lights): {{ states.switch.backyard_pathway_landscape_lights.state }}
+  Back Wall Landscape Lights (entity: switch.back_wall_landscape_lights): {{ states.switch.back_wall_landscape_lights.state }}
+  Side Fence Landscape Lights (entity: switch.side_fence_landscape_lights): {{ states.switch.side_fence_landscape_lights.state }}

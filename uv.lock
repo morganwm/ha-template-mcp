@@ -415,10 +415,11 @@ wheels = [
 [[package]]
 name = "ha-template-mcp"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "click" },
     { name = "fastmcp" },
+    { name = "requests" },
 ]
 
 [package.dev-dependencies]
@@ -434,6 +435,7 @@ test = [
 requires-dist = [
     { name = "click", specifier = ">=8.3.0" },
     { name = "fastmcp", specifier = ">=2.12.4" },
+    { name = "requests", specifier = ">=2.32.5" },
 ]
 
 [package.metadata.requires-dev]
